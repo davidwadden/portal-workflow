@@ -24,15 +24,28 @@ repositories {
     maven { url "https://repo.spring.io/milestone" }
 }
 
+ext {
+    springShellVersion = '2.0.1.RELEASE'
+    junitVersion = '5.3.1'
+}
 
 dependencies {
     compile('org.springframework.shell:spring-shell-starter')
+    compile('org.springframework.boot:spring-boot-starter')
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.junit.jupiter:junit-jupiter-api')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine')
 }
 
 dependencyManagement {
     dependencies {
-        dependency 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
+        dependency "org.springframework.shell:spring-shell-starter:${springShellVersion}"
+        dependency "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+        dependency "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     }
+}
+
+test {
+    useJUnitPlatform()
 }
