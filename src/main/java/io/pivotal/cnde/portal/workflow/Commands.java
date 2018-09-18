@@ -2,6 +2,7 @@ package io.pivotal.cnde.portal.workflow;
 
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.statemachine.StateMachine;
 
 @ShellComponent
 public class Commands {
@@ -20,5 +21,9 @@ public class Commands {
     return "completed";
   }
 
+  @ShellMethod(value = "Fetch job and print details of State Machine", key = "get-job")
+  public StateMachine<OrderStates, OrderEvents> getJob() {
+    return jobService.getJob();
+  }
 
 }

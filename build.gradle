@@ -26,12 +26,19 @@ repositories {
 
 ext {
     springShellVersion = '2.0.1.RELEASE'
+    springStatemachineVersion = '2.0.1.RELEASE'
     junitVersion = '5.3.1'
 }
 
 dependencies {
-    compile('org.springframework.shell:spring-shell-starter')
     compile('org.springframework.boot:spring-boot-starter')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.statemachine:spring-statemachine-starter')
+    compile('org.springframework.statemachine:spring-statemachine-data-jpa')
+    compile('org.springframework.shell:spring-shell-starter')
+
+    runtime('com.h2database:h2')
+    runtime('org.postgresql:postgresql')
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.junit.jupiter:junit-jupiter-api')
@@ -39,6 +46,10 @@ dependencies {
 }
 
 dependencyManagement {
+    imports {
+        mavenBom "org.springframework.statemachine:spring-statemachine-bom:${springStatemachineVersion}"
+    }
+
     dependencies {
         dependency "org.springframework.shell:spring-shell-starter:${springShellVersion}"
         dependency "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
