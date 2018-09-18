@@ -1,29 +1,24 @@
 package io.pivotal.cnde.portal.workflow;
 
+import io.pivotal.cnde.portal.workflow.appteam.AppTeamWorkflowService;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import org.springframework.statemachine.StateMachine;
 
 @ShellComponent
 public class Commands {
 
-  private final JobService jobService;
+  private final AppTeamWorkflowService appTeamWorkflowService;
 
-  public Commands(JobService jobService) {
-    this.jobService = jobService;
+  public Commands(AppTeamWorkflowService appTeamWorkflowService) {
+    this.appTeamWorkflowService = appTeamWorkflowService;
   }
 
-  @ShellMethod(value = "Submit job with random set of parameters", key = "submit-job")
-  public String submitJob() {
+  @ShellMethod(value = "Trigger workflow", key = "trigger-workflow")
+  public String triggerWorkflow(String appTeamName) {
 
-    jobService.submitJob();
+    appTeamWorkflowService.triggerWorkflow(appTeamName);
 
     return "completed";
-  }
-
-  @ShellMethod(value = "Fetch job and print details of State Machine", key = "get-job")
-  public StateMachine<OrderStates, OrderEvents> getJob() {
-    return jobService.getJob();
   }
 
 }

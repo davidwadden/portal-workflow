@@ -3,6 +3,7 @@ package io.pivotal.cnde.portal.workflow;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
+import io.pivotal.cnde.portal.workflow.appteam.AppTeamWorkflowService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ class CommandsTest {
   private final Shell shell;
 
   @MockBean
-  private JobService jobService;
+  private AppTeamWorkflowService appTeamWorkflowService;
 
   @Autowired
   CommandsTest(Shell shell) {
@@ -33,9 +34,9 @@ class CommandsTest {
   }
 
   @Test
-  void submitJob() {
-    assertThat(shell.evaluate(() -> "submit-job")).isEqualTo("completed");
+  void triggerWorkflow() {
+    assertThat(shell.evaluate(() -> "trigger-workflow some-app-team-name")).isEqualTo("completed");
 
-    verify(jobService).submitJob();
+    verify(appTeamWorkflowService).triggerWorkflow("some-app-team-name");
   }
 }
