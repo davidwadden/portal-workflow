@@ -1,10 +1,16 @@
 package io.pivotal.cnde.portal.workflow.appteam;
 
+import io.pivotal.cnde.portal.workflow.appteam.TrackerStreamConfig.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
@@ -26,6 +32,10 @@ public class AppTeamStateMachineConfig extends
   @Autowired
   private StateMachineRuntimePersister<States, Events, String> stateMachineRuntimePersister;
 
+  @Qualifier(Tracker.PROVISION)
+  @Autowired
+  private MessageChannel trackerProvisionChannel;
+
   @Override
   public void configure(StateMachineStateConfigurer<States, Events> states)
       throws Exception {
@@ -46,6 +56,7 @@ public class AppTeamStateMachineConfig extends
           .source(States.START)
           .target(States.TRACKER_PROVISIONING)
           .event(Events.TRACKER_STARTED)
+          .action(provisionTrackerAction())
         .and()
         .withExternal()
           .source(States.TRACKER_PROVISIONING)
@@ -77,6 +88,18 @@ public class AppTeamStateMachineConfig extends
         .and()
         .withPersistence()
         .runtimePersister(stateMachineRuntimePersister);
+  }
+
+  @Bean
+  public Action<States, Events> provisionTrackerAction() {
+
+    return context -> {
+      Message<String> message = MessageBuilder.withPayload("provision-tracker-parameters")
+          .build();
+
+      logger.info("trackerProvisionChannel:send(message: {})", message);
+      trackerProvisionChannel.send(message);
+    };
   }
 
 }

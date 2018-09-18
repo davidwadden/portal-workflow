@@ -11,6 +11,19 @@ spring:
 
 spring:
   profiles: rabbitmq
+  cloud:
+    stream:
+      bindings:
+        ## used by workflow
+        tracker-provision-send:
+          destination: tracker-provision
+        tracker-status-listen:
+          destination: tracker-status
+        ## used by tracker worker
+        tracker-provision-listen:
+          destination: tracker-provision
+        tracker-status-send:
+          destination: tracker-status
   rabbitmq:
     host: localhost
     port: 5672

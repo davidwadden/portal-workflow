@@ -1,24 +1,25 @@
 package io.pivotal.cnde.portal.workflow.appteam;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.pivotal.cnde.portal.workflow.TestApplicationRunner;
+import io.pivotal.cnde.portal.workflow.appteam.TrackerStreamConfig.Tracker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.ScriptShellApplicationRunner;
 import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.statemachine.test.StateMachineTestPlan;
 import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
@@ -33,14 +34,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @Import(TestApplicationRunner.class)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
-    classes = {
-        DataSourceAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class,
-        JpaRepositoriesAutoConfiguration.class,
-        StateMachineJpaRepositoriesAutoConfiguration.class,
-        AppTeamStateMachineConfig.class,
-        AppTeamStateMachinePersistConfig.class,
-    },
     properties = {
         ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false",
         InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
@@ -50,6 +43,13 @@ class AppTeamStateMachineTest {
 
   @Autowired
   private StateMachineService<States, Events> stateMachineService;
+
+  @Autowired
+  private MessageCollector messageCollector;
+
+  @Qualifier(Tracker.PROVISION)
+  @Autowired
+  private MessageChannel trackerProvisionChannel;
 
   @AfterEach
   void tearDown() {
@@ -80,5 +80,33 @@ class AppTeamStateMachineTest {
     //@formatter:on
 
     plan.test();
+  }
+
+  @Test
+  void provisionTracker() throws Exception {
+    StateMachine<States, Events> stateMachine = stateMachineService
+        .acquireStateMachine("some-machine-id");
+
+    //@formatter:off
+    StateMachineTestPlan<States, Events> plan =
+        StateMachineTestPlanBuilder.<States, Events>builder()
+            .stateMachine(stateMachine)
+            .step()
+              .expectState(States.START)
+            .and()
+            .step()
+              .sendEvent(Events.TRACKER_STARTED)
+              .expectState(States.TRACKER_PROVISIONING)
+            .and()
+            .build();
+    //@formatter:on
+
+    plan.test();
+
+    Message<?> message = messageCollector
+        .forChannel(trackerProvisionChannel)
+        .poll();
+    assertThat(message).isNotNull();
+
   }
 }
