@@ -57,21 +57,28 @@ class AppTeamStateMachineTest {
   }
 
   @Test
-  void approve() throws Exception {
+  void workflow() throws Exception {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-machine-id");
 
-    Message<Events> approveEvent = MessageBuilder.withPayload(Events.APPROVE)
-        .setHeader("approver", "some-approver")
-        .build();
+    //@formatter:off
     StateMachineTestPlan<States, Events> plan =
         StateMachineTestPlanBuilder.<States, Events>builder()
             .stateMachine(stateMachine)
-            .step().expectState(States.START).and()
-            .step().sendEvent(approveEvent)
-            .expectState(States.APPROVED)
-            .expectVariable("approver", "some-approver").and()
+            .step()
+              .expectState(States.START)
+            .and()
+            .step()
+              .sendEvent(Events.TRACKER_STARTED)
+              .expectState(States.TRACKER_PROVISIONING)
+            .and()
+            .step()
+              .sendEvent(Events.TRACKER_FINISHED)
+              .expectState(States.FINISH)
+            .and()
             .build();
+    //@formatter:on
+
     plan.test();
   }
 }

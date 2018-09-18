@@ -1,7 +1,5 @@
 package io.pivotal.cnde.portal.workflow.appteam;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.stereotype.Service;
@@ -23,10 +21,7 @@ public class AppTeamWorkflowService {
       throw new IllegalStateException();
     }
 
-    Message<Events> approveEvent = MessageBuilder.withPayload(Events.APPROVE)
-        .setHeader("approver", "some-approver")
-        .build();
-    stateMachine.sendEvent(approveEvent);
+    stateMachine.sendEvent(Events.TRACKER_STARTED);
   }
 
 }

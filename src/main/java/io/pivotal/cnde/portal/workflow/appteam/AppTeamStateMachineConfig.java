@@ -3,10 +3,8 @@ package io.pivotal.cnde.portal.workflow.appteam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
-import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
@@ -34,9 +32,8 @@ public class AppTeamStateMachineConfig extends
 
     states.withStates()
         .initial(States.START)
-        .state(States.APPROVED)
-        .end(States.PROVISIONED)
-        .end(States.CANCELED);
+        .state(States.TRACKER_PROVISIONING)
+        .end(States.FINISH);
   }
 
   @Override
@@ -45,13 +42,15 @@ public class AppTeamStateMachineConfig extends
 
     //@formatter:off
     transitions
-        .withExternal().source(States.START).target(States.APPROVED).event(Events.APPROVE).action(approveAction())
+        .withExternal()
+          .source(States.START)
+          .target(States.TRACKER_PROVISIONING)
+          .event(Events.TRACKER_STARTED)
         .and()
-        .withExternal().source(States.APPROVED).target(States.PROVISIONED).event(Events.PROVISION)
-        .and()
-        .withExternal().source(States.START).target(States.CANCELED).event(Events.CANCEL)
-        .and()
-        .withExternal().source(States.APPROVED).target(States.CANCELED).event(Events.CANCEL);
+        .withExternal()
+          .source(States.TRACKER_PROVISIONING)
+          .target(States.FINISH)
+          .event(Events.TRACKER_FINISHED);
     //@formatter:on
   }
 
@@ -74,35 +73,21 @@ public class AppTeamStateMachineConfig extends
 
     config
         .withConfiguration()
-        .autoStartup(false)
         .listener(listener)
         .and()
         .withPersistence()
         .runtimePersister(stateMachineRuntimePersister);
   }
 
-
-  @Bean
-  public Action<States, Events> approveAction() {
-    return context -> {
-      String approver = context.getMessage().getHeaders().get("approver", String.class);
-      context.getExtendedState().getVariables().put("approver", approver);
-      logger.info("approveAction(approver: {})", approver);
-    };
-  }
-
-
 }
 
 enum States {
   START,
-  APPROVED,
-  PROVISIONED,
-  CANCELED
+  TRACKER_PROVISIONING,
+  FINISH
 }
 
 enum Events {
-  APPROVE,
-  PROVISION,
-  CANCEL
+  TRACKER_STARTED,
+  TRACKER_FINISHED
 }
