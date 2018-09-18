@@ -5,7 +5,17 @@ server:
 
 spring:
   profiles:
-    include: h2
+    include: h2,rabbitmq
+
+---
+
+spring:
+  profiles: rabbitmq
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: bitnami
 
 ---
 
