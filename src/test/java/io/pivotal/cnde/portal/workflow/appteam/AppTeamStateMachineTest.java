@@ -107,6 +107,31 @@ class AppTeamStateMachineTest {
         .forChannel(trackerProvisionChannel)
         .poll();
     assertThat(message).isNotNull();
-
   }
+
+  @Test
+  void trackerStatus() throws Exception {
+    StateMachine<States, Events> stateMachine = stateMachineService
+        .acquireStateMachine("some-machine-id");
+    stateMachine.sendEvent(Events.TRACKER_STARTED);
+
+    // send message to trackerStatusListen
+
+    //@formatter:off
+    StateMachineTestPlan<States, Events> plan =
+        StateMachineTestPlanBuilder.<States, Events>builder()
+            .stateMachine(stateMachine)
+            .step()
+              .expectState(States.TRACKER_PROVISIONING)
+            .and()
+            .step()
+              .sendEvent(Events.TRACKER_FINISHED)
+              .expectState(States.FINISH)
+            .and()
+            .build();
+    //@formatter:on
+
+    plan.test();
+  }
+
 }

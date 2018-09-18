@@ -22,9 +22,12 @@ public class TrackerWorkerStreamConfig {
 
   @SendTo(TrackerWorker.STATUS)
   @StreamListener(TrackerWorker.PROVISION)
-  public Message<?> handleMessage(Message<?> message) {
+  public Message<?> handleMessage(Message<?> message) throws InterruptedException {
 
-    logger.info("trackerProvision:handleMessage(message: {}, payload: {})", message, message.getPayload());
+    logger.info("trackerProvision:handleMessage(message: {}, payload: {})", message,
+        message.getPayload().toString());
+
+    Thread.sleep(200L);
 
     return MessageBuilder.withPayload("acknowledge-tracker-provision")
         .build();
