@@ -22,19 +22,19 @@ import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 import org.springframework.statemachine.state.State;
 
 @Configuration
-@EnableStateMachineFactory(name = "projectStateMachineFactory")
+@EnableStateMachineFactory(name = "appTeamStateMachineFactory")
 public class AppTeamStateMachineConfig extends
     EnumStateMachineConfigurerAdapter<States, Events> {
 
-  private static final Logger logger = LoggerFactory.getLogger(
-      AppTeamStateMachineConfig.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(AppTeamStateMachineConfig.class);
 
   @Autowired
   private StateMachineRuntimePersister<States, Events, String> stateMachineRuntimePersister;
 
-  @Qualifier(Tracker.PROVISION)
+  @Qualifier(Tracker.REQUEST)
   @Autowired
-  private MessageChannel trackerProvisionChannel;
+  private MessageChannel trackerRequestChannel;
 
   @Override
   public void configure(StateMachineStateConfigurer<States, Events> states)
@@ -56,7 +56,7 @@ public class AppTeamStateMachineConfig extends
           .source(States.START)
           .target(States.TRACKER_PROVISIONING)
           .event(Events.TRACKER_STARTED)
-          .action(provisionTrackerAction())
+          .action(createTrackerProjectAction())
         .and()
         .withExternal()
           .source(States.TRACKER_PROVISIONING)
@@ -80,22 +80,27 @@ public class AppTeamStateMachineConfig extends
   }
 
   @Bean
-  public Action<States, Events> provisionTrackerAction() {
+  public Action<States, Events> createTrackerProjectAction() {
 
     return context -> {
-      CreateTrackerProject createProjectWorkerEvent = new CreateTrackerProject(
+      CreateTrackerProjectDto createProjectWorkerEvent = new CreateTrackerProjectDto(
           context.getStateMachine().getId(), "some-project-name", "some-owner-email");
-      Message<CreateTrackerProject> message = MessageBuilder.withPayload(
-          createProjectWorkerEvent)
+
+      Message<CreateTrackerProjectDto> message = MessageBuilder
+          .withPayload(createProjectWorkerEvent)
           .build();
 
-      logger.info("trackerProvisionChannel:send(message: {})", message);
-      trackerProvisionChannel.send(message);
+      logger.info(String.format(
+          "createTrackerProject(message: %s, payload: %s)", message, message.getPayload()));
+      trackerRequestChannel.send(message);
     };
   }
 
   private static class LoggingStateMachineListenerAdapter extends
       StateMachineListenerAdapter<States, Events> {
+
+    private static final Logger logger =
+        LoggerFactory.getLogger(LoggingStateMachineListenerAdapter.class);
 
     @Override
     public void stateChanged(State<States, Events> from,

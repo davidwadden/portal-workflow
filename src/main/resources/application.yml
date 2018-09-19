@@ -15,15 +15,15 @@ spring:
     stream:
       bindings:
         ## used by workflow
-        tracker-provision-send:
-          destination: tracker-provision
-        tracker-status-listen:
-          destination: tracker-status
+        tracker-request-send:
+          destination: tracker-request
+        tracker-response-listen:
+          destination: tracker-response
         ## used by tracker worker
-        tracker-provision-listen:
-          destination: tracker-provision
-        tracker-status-send:
-          destination: tracker-status
+        tracker-request-listen:
+          destination: tracker-request
+        tracker-response-send:
+          destination: tracker-response
   rabbitmq:
     host: localhost
     port: 5672

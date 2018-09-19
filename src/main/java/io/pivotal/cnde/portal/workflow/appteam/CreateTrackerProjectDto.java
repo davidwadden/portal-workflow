@@ -2,12 +2,12 @@ package io.pivotal.cnde.portal.workflow.appteam;
 
 import java.util.Objects;
 
-public class CreateTrackerProject extends WorkerCommand {
+public class CreateTrackerProjectDto extends WorkerCommandDto {
 
   private final String projectName;
   private final String ownerEmail;
 
-  public CreateTrackerProject(String workflowId, String projectName, String ownerEmail) {
+  public CreateTrackerProjectDto(String workflowId, String projectName, String ownerEmail) {
     super(workflowId);
     this.projectName = projectName;
     this.ownerEmail = ownerEmail;
@@ -32,7 +32,7 @@ public class CreateTrackerProject extends WorkerCommand {
     if (!super.equals(o)) {
       return false;
     }
-    CreateTrackerProject that = (CreateTrackerProject) o;
+    CreateTrackerProjectDto that = (CreateTrackerProjectDto) o;
     return Objects.equals(projectName, that.projectName) &&
         Objects.equals(ownerEmail, that.ownerEmail);
   }
@@ -44,7 +44,7 @@ public class CreateTrackerProject extends WorkerCommand {
 
   @Override
   public String toString() {
-    return "CreateTrackerProject{" +
+    return "CreateTrackerProjectDto{" +
         "projectName='" + projectName + '\'' +
         ", ownerEmail='" + ownerEmail + '\'' +
         "} " + super.toString();

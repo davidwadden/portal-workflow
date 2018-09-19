@@ -9,13 +9,13 @@ import java.util.Objects;
 
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = CreateTrackerProject.class, name = "create-tracker-project"),
+    @JsonSubTypes.Type(value = CreateTrackerProjectDto.class, name = "create-tracker-project"),
 })
-public abstract class WorkerCommand {
+public abstract class WorkerCommandDto {
 
   private final String workflowId;
 
-  protected WorkerCommand(String workflowId) {
+  protected WorkerCommandDto(String workflowId) {
     this.workflowId = workflowId;
   }
 
@@ -31,7 +31,7 @@ public abstract class WorkerCommand {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WorkerCommand that = (WorkerCommand) o;
+    WorkerCommandDto that = (WorkerCommandDto) o;
     return Objects.equals(workflowId, that.workflowId);
   }
 
@@ -42,7 +42,7 @@ public abstract class WorkerCommand {
 
   @Override
   public String toString() {
-    return "WorkerCommand{" +
+    return "WorkerCommandDto{" +
         "workflowId='" + workflowId + '\'' +
         '}';
   }

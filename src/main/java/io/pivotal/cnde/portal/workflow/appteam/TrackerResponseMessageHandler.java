@@ -13,25 +13,25 @@ import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TrackerStatusMessageHandler {
+public class TrackerResponseMessageHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(TrackerStatusMessageHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(TrackerResponseMessageHandler.class);
 
   private final StateMachineService<States, Events> stateMachineService;
 
-  public TrackerStatusMessageHandler(
+  public TrackerResponseMessageHandler(
       StateMachineService<States, Events> stateMachineService) {
     this.stateMachineService = stateMachineService;
   }
 
-  @StreamListener(Tracker.STATUS)
-  public void handleMessage(Message<WorkerStatusDto> message) {
-    logger.info("trackerStatus:handleMessage(message: {}, payload: {})", message,
-        message.getPayload());
+  @StreamListener(Tracker.RESPONSE)
+  public void handleMessage(Message<TrackerResponseDto> message) {
+    logger.info("trackerResponse(message: {}, payload: {})",
+        message, message.getPayload());
 
     if (!Objects.equals(message.getPayload().getType(), "create-tracker-project")) {
       throw new IllegalArgumentException(
-          String.format("Unexpected status type: %s", message.getPayload().getType()));
+          String.format("Unexpected response type: %s", message.getPayload().getType()));
     }
 
     StateMachine<States, Events> stateMachine = stateMachineService
@@ -42,13 +42,13 @@ public class TrackerStatusMessageHandler {
 
 }
 
-class WorkerStatusDto {
+class TrackerResponseDto {
 
   private final String workflowId;
   private final String type;
 
   @JsonCreator
-  public WorkerStatusDto(
+  public TrackerResponseDto(
       @JsonProperty("workflowId") String workflowId,
       @JsonProperty("@type") String type) {
     this.workflowId = workflowId;
@@ -71,7 +71,7 @@ class WorkerStatusDto {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WorkerStatusDto that = (WorkerStatusDto) o;
+    TrackerResponseDto that = (TrackerResponseDto) o;
     return Objects.equals(workflowId, that.workflowId) &&
         Objects.equals(type, that.type);
   }
@@ -83,7 +83,7 @@ class WorkerStatusDto {
 
   @Override
   public String toString() {
-    return "WorkerStatusDto{" +
+    return "TrackerResponseDto{" +
         "workflowId='" + workflowId + '\'' +
         ", type='" + type + '\'' +
         '}';

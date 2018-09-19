@@ -13,12 +13,13 @@ public class AppTeamWorkflowService {
     this.stateMachineService = stateMachineService;
   }
 
-  public void triggerWorkflow(String appTeamName) {
+  public void triggerWorkflow(String workflowId) {
     StateMachine<States, Events> stateMachine = stateMachineService
-        .acquireStateMachine(appTeamName);
+        .acquireStateMachine(workflowId);
 
-    if (stateMachine.getState().getId() != States.START) {
-      throw new IllegalStateException();
+    States currentState = stateMachine.getState().getId();
+    if (currentState != States.START) {
+      throw new IllegalStateException(String.format("Invalid state: %s", currentState));
     }
 
     stateMachine.sendEvent(Events.TRACKER_STARTED);

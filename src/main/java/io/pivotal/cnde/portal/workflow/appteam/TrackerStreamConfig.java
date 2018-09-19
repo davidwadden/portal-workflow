@@ -14,14 +14,14 @@ public class TrackerStreamConfig {
 
   interface Tracker {
 
-    String PROVISION = "tracker-provision-send";
-    String STATUS = "tracker-status-listen";
+    String REQUEST = "tracker-request-send";
+    String RESPONSE = "tracker-response-listen";
 
-    @Output(PROVISION)
-    MessageChannel trackerProvision();
+    @Output(REQUEST)
+    MessageChannel request();
 
-    @Input(STATUS)
-    SubscribableChannel trackerStatus();
+    @Input(RESPONSE)
+    SubscribableChannel response();
   }
 
 }

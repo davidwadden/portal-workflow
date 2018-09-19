@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import io.pivotal.cnde.portal.workflow.TestApplicationRunner;
 import io.pivotal.cnde.portal.workflow.appteam.TrackerStreamConfig.Tracker;
-import io.pivotal.cnde.portal.workflow.support.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,35 +23,32 @@ import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @Import(TestApplicationRunner.class)
-@ExtendWith({
-    SpringExtension.class,
-    MockitoExtension.class,
-})
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(
     properties = {
         ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false",
         InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
     }
 )
-class TrackerStatusMessageHandlerTest {
+class TrackerResponseMessageHandlerTest {
 
   @MockBean
   private StateMachineService<States, Events> mockStateMachineService;
   @MockBean
   private StateMachine<States, Events> mockStateMachine;
 
-  @Qualifier(Tracker.STATUS)
+  @Qualifier(Tracker.RESPONSE)
   @Autowired
-  private MessageChannel trackerStatusChannel;
+  private MessageChannel trackerResponseChannel;
 
   @Test
   void handleMessage() {
     when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
 
-    String statusPayload = "{\"workflowId\":\"some-workflow-id\",\"@type\":\"create-tracker-project\"}";
-    Message<byte[]> message = MessageBuilder.withPayload(statusPayload.getBytes())
+    String responsePayload = "{\"workflowId\":\"some-workflow-id\",\"@type\":\"create-tracker-project\"}";
+    Message<byte[]> message = MessageBuilder.withPayload(responsePayload.getBytes())
         .build();
-    trackerStatusChannel.send(message);
+    trackerResponseChannel.send(message);
 
     verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
     verify(mockStateMachine).sendEvent(Events.TRACKER_FINISHED);

@@ -23,9 +23,9 @@ public class TrackerWorkerStreamConfig {
 
   private static final Logger logger = LoggerFactory.getLogger(TrackerWorkerStreamConfig.class);
 
-  @SendTo(TrackerWorker.STATUS)
-  @StreamListener(TrackerWorker.PROVISION)
-  public Message<?> handleMessage(Message<CreateTrackerProjectDto> message)
+  @SendTo(TrackerWorker.RESPONSE)
+  @StreamListener(TrackerWorker.REQUEST)
+  public Message<?> handleMessage(Message<CreateTrackerProjectWorkerDto> message)
       throws InterruptedException {
 
     logger.info("createTrackerProject:handleMessage(message: {}, payload: {})",
@@ -33,36 +33,36 @@ public class TrackerWorkerStreamConfig {
 
     Thread.sleep(2000L);
 
-    String statusPayloadTemplate = "{\"workflowId\":\"%s\",\"@type\":\"create-tracker-project\"}";
-    String statusPayload =
-        String.format(statusPayloadTemplate, message.getPayload().getWorkflowId());
+    String responsePayloadTemplate = "{\"workflowId\":\"%s\",\"@type\":\"create-tracker-project\"}";
+    String responsePayload =
+        String.format(responsePayloadTemplate, message.getPayload().getWorkflowId());
 
-    return MessageBuilder.withPayload(statusPayload)
+    return MessageBuilder.withPayload(responsePayload)
         .build();
   }
 
   interface TrackerWorker {
 
-    String PROVISION = "tracker-provision-listen";
-    String STATUS = "tracker-status-send";
+    String REQUEST = "tracker-request-listen";
+    String RESPONSE = "tracker-response-send";
 
-    @Input(PROVISION)
-    SubscribableChannel trackerProvision();
+    @Input(REQUEST)
+    SubscribableChannel request();
 
-    @Output(STATUS)
-    MessageChannel trackerStatus();
+    @Output(RESPONSE)
+    MessageChannel response();
   }
 
 }
 
-class CreateTrackerProjectDto {
+class CreateTrackerProjectWorkerDto {
 
   private final String workflowId;
   private final String type;
   private final String ownerEmail;
 
   @JsonCreator
-  public CreateTrackerProjectDto(
+  public CreateTrackerProjectWorkerDto(
       @JsonProperty("workflowId") String workflowId,
       @JsonProperty("@type") String type,
       @JsonProperty("ownerEmail") String ownerEmail) {
@@ -91,7 +91,7 @@ class CreateTrackerProjectDto {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CreateTrackerProjectDto that = (CreateTrackerProjectDto) o;
+    CreateTrackerProjectWorkerDto that = (CreateTrackerProjectWorkerDto) o;
     return Objects.equals(workflowId, that.workflowId) &&
         Objects.equals(type, that.type) &&
         Objects.equals(ownerEmail, that.ownerEmail);
@@ -104,7 +104,7 @@ class CreateTrackerProjectDto {
 
   @Override
   public String toString() {
-    return "CreateTrackerProjectDto{" +
+    return "CreateTrackerProjectWorkerDto{" +
         "workflowId='" + workflowId + '\'' +
         ", type='" + type + '\'' +
         ", ownerEmail='" + ownerEmail + '\'' +

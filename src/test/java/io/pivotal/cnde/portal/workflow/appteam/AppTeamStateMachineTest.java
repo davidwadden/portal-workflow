@@ -47,9 +47,9 @@ class AppTeamStateMachineTest {
   @Autowired
   private MessageCollector messageCollector;
 
-  @Qualifier(Tracker.PROVISION)
+  @Qualifier(Tracker.REQUEST)
   @Autowired
-  private MessageChannel trackerProvisionChannel;
+  private MessageChannel trackerRequestChannel;
 
   @AfterEach
   void tearDown() {
@@ -83,7 +83,7 @@ class AppTeamStateMachineTest {
   }
 
   @Test
-  void provisionTracker() throws Exception {
+  void trackerRequest() throws Exception {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-machine-id");
 
@@ -104,7 +104,7 @@ class AppTeamStateMachineTest {
     plan.test();
 
     Message<?> message = messageCollector
-        .forChannel(trackerProvisionChannel)
+        .forChannel(trackerRequestChannel)
         .poll();
     assertThat(message).isNotNull();
 
@@ -113,7 +113,7 @@ class AppTeamStateMachineTest {
   }
 
   @Test
-  void trackerStatus() throws Exception {
+  void trackerFinish() throws Exception {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-machine-id");
     stateMachine.sendEvent(Events.TRACKER_STARTED);

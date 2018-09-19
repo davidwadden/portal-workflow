@@ -35,8 +35,8 @@ class CommandsTest {
 
   @Test
   void triggerWorkflow() {
-    assertThat(shell.evaluate(() -> "trigger-workflow some-app-team-name")).isEqualTo("completed");
+    assertThat(shell.evaluate(() -> "trigger-workflow some-workflow-id")).isEqualTo("completed");
 
-    verify(mockAppTeamWorkflowService).triggerWorkflow("some-app-team-name");
+    verify(mockAppTeamWorkflowService).triggerWorkflow("some-workflow-id");
   }
 }
