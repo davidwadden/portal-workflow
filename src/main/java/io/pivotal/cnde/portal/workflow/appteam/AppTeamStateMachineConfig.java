@@ -83,11 +83,13 @@ public class AppTeamStateMachineConfig extends
   public Action<States, Events> createTrackerProjectAction() {
 
     return context -> {
-      CreateTrackerProjectDto createProjectWorkerEvent = new CreateTrackerProjectDto(
-          context.getStateMachine().getId(), "some-project-name", "some-owner-email");
+      CreateTrackerProjectDto commandDto = new CreateTrackerProjectDto(
+          context.getStateMachine().getId(),
+          context.getExtendedState().get("projectName", String.class),
+          context.getExtendedState().get("ownerEmail", String.class));
 
       Message<CreateTrackerProjectDto> message = MessageBuilder
-          .withPayload(createProjectWorkerEvent)
+          .withPayload(commandDto)
           .build();
 
       logger.info(String.format(

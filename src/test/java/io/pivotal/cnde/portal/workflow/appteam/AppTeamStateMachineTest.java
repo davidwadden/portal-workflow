@@ -87,6 +87,9 @@ class AppTeamStateMachineTest {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-machine-id");
 
+    stateMachine.getExtendedState().getVariables().put("projectName", "some-project-name");
+    stateMachine.getExtendedState().getVariables().put("ownerEmail", "some-owner-email");
+
     //@formatter:off
     StateMachineTestPlan<States, Events> plan =
         StateMachineTestPlanBuilder.<States, Events>builder()
@@ -116,6 +119,10 @@ class AppTeamStateMachineTest {
   void trackerFinish() throws Exception {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-machine-id");
+
+    stateMachine.getExtendedState().getVariables().put("projectName", "some-project-name");
+    stateMachine.getExtendedState().getVariables().put("ownerEmail", "some-owner-email");
+
     stateMachine.sendEvent(Events.TRACKER_STARTED);
 
     //@formatter:off

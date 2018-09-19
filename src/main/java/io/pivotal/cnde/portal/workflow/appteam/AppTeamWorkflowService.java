@@ -13,7 +13,7 @@ public class AppTeamWorkflowService {
     this.stateMachineService = stateMachineService;
   }
 
-  public void triggerWorkflow(String workflowId) {
+  public void triggerWorkflow(String workflowId, String projectName, String ownerEmail) {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine(workflowId);
 
@@ -22,7 +22,9 @@ public class AppTeamWorkflowService {
       throw new IllegalStateException(String.format("Invalid state: %s", currentState));
     }
 
+    stateMachine.getExtendedState().getVariables().put("projectName", projectName);
+    stateMachine.getExtendedState().getVariables().put("ownerEmail", ownerEmail);
+
     stateMachine.sendEvent(Events.TRACKER_STARTED);
   }
-
 }
