@@ -28,11 +28,11 @@ class AppTeamWorkflowServiceTest {
   @Mock
   private State<States, Events> mockState;
 
-  private AppTeamWorkflowService workflowService;
+  private AppTeamWorkflowService appTeamWorkflowService;
 
   @BeforeEach
   void setUp() {
-    workflowService = new AppTeamWorkflowService(mockStateMachineService);
+    appTeamWorkflowService = new AppTeamWorkflowService(mockStateMachineService);
   }
 
   @Test
@@ -43,7 +43,8 @@ class AppTeamWorkflowServiceTest {
     when(mockStateMachine.getExtendedState()).thenReturn(extendedState);
     when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
 
-    workflowService.triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email");
+    appTeamWorkflowService
+        .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email");
 
     verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
 
@@ -62,9 +63,22 @@ class AppTeamWorkflowServiceTest {
 
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(
-            () -> workflowService
+            () -> appTeamWorkflowService
                 .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email"));
 
     verify(mockStateMachine, never()).sendEvent(any(Events.class));
+  }
+
+  @Test
+  void finishTracker() {
+    when(mockState.getId()).thenReturn(States.TRACKER_PROVISIONING);
+    when(mockStateMachine.getState()).thenReturn(mockState);
+    when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
+
+    appTeamWorkflowService.finishTracker("some-workflow-id");
+
+    verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
+
+    verify(mockStateMachine).sendEvent(Events.TRACKER_FINISHED);
   }
 }

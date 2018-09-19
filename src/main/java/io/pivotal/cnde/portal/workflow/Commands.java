@@ -14,14 +14,10 @@ public class Commands {
   }
 
   @ShellMethod(value = "Trigger workflow", key = "trigger-workflow")
-  public String triggerWorkflow(
-      String workflowId,
-      String projectName,
-      String ownerEmail) {
+  public String triggerWorkflow(String workflowId, String projectName, String ownerEmail) {
 
     appTeamWorkflowService.triggerWorkflow(workflowId, projectName, ownerEmail);
 
     return "completed";
   }
-
 }

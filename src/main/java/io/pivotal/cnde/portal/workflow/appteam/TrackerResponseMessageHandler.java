@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;
-import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,11 +15,10 @@ public class TrackerResponseMessageHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(TrackerResponseMessageHandler.class);
 
-  private final StateMachineService<States, Events> stateMachineService;
+  private final AppTeamWorkflowService appTeamWorkflowService;
 
-  public TrackerResponseMessageHandler(
-      StateMachineService<States, Events> stateMachineService) {
-    this.stateMachineService = stateMachineService;
+  public TrackerResponseMessageHandler(AppTeamWorkflowService appTeamWorkflowService) {
+    this.appTeamWorkflowService = appTeamWorkflowService;
   }
 
   @StreamListener(Tracker.RESPONSE)
@@ -34,12 +31,8 @@ public class TrackerResponseMessageHandler {
           String.format("Unexpected response type: %s", message.getPayload().getType()));
     }
 
-    StateMachine<States, Events> stateMachine = stateMachineService
-        .acquireStateMachine(message.getPayload().getWorkflowId());
-
-    stateMachine.sendEvent(Events.TRACKER_FINISHED);
+    appTeamWorkflowService.finishTracker(message.getPayload().getWorkflowId());
   }
-
 }
 
 class TrackerResponseDto {

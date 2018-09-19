@@ -1,94 +1,46 @@
 package io.pivotal.cnde.portal.workflow.appteam;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
-import io.pivotal.cnde.portal.workflow.TestApplicationRunner;
 import io.pivotal.cnde.portal.workflow.appteam.TrackerStreamConfig.Tracker;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.test.binder.MessageCollector;
-import org.springframework.context.annotation.Import;
-import org.springframework.messaging.Message;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
-import org.springframework.shell.jline.ScriptShellApplicationRunner;
 import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.service.StateMachineService;
+import org.springframework.statemachine.action.Action;
+import org.springframework.statemachine.config.StateMachineFactory;
+import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 import org.springframework.statemachine.test.StateMachineTestPlan;
 import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase
-@AutoConfigureTestEntityManager
-@EnableAutoConfiguration
-@Import(TestApplicationRunner.class)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
-    properties = {
-        ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false",
-        InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
+    classes = {
+        AppTeamStateMachineConfig.class,
     }
 )
 class AppTeamStateMachineTest {
 
-  @Autowired
-  private StateMachineService<States, Events> stateMachineService;
-
-  @Autowired
-  private MessageCollector messageCollector;
-
-  @Qualifier(Tracker.REQUEST)
-  @Autowired
+  @MockBean
+  private Action<States, Events> createTrackerProjectAction;
+  @MockBean(name = Tracker.REQUEST)
   private MessageChannel trackerRequestChannel;
+  @MockBean
+  private StateMachineRuntimePersister<States, Events, String> stateMachineRuntimePersister;
 
-  @AfterEach
-  void tearDown() {
-    stateMachineService.releaseStateMachine("some-machine-id");
-  }
-
-  @Test
-  void workflow() throws Exception {
-    StateMachine<States, Events> stateMachine = stateMachineService
-        .acquireStateMachine("some-machine-id");
-
-    //@formatter:off
-    StateMachineTestPlan<States, Events> plan =
-        StateMachineTestPlanBuilder.<States, Events>builder()
-            .stateMachine(stateMachine)
-            .step()
-              .expectState(States.START)
-            .and()
-            .step()
-              .sendEvent(Events.TRACKER_STARTED)
-              .expectState(States.TRACKER_PROVISIONING)
-            .and()
-            .step()
-              .sendEvent(Events.TRACKER_FINISHED)
-              .expectState(States.FINISH)
-            .and()
-            .build();
-    //@formatter:on
-
-    plan.test();
-  }
+  @Autowired
+  private StateMachineFactory<States, Events> stateMachineFactory;
 
   @Test
   void trackerRequest() throws Exception {
-    StateMachine<States, Events> stateMachine = stateMachineService
-        .acquireStateMachine("some-machine-id");
-
-    stateMachine.getExtendedState().getVariables().put("projectName", "some-project-name");
-    stateMachine.getExtendedState().getVariables().put("ownerEmail", "some-owner-email");
+    StateMachine<States, Events> stateMachine = stateMachineFactory
+        .getStateMachine("some-machine-id");
+    stateMachine.start();
 
     //@formatter:off
     StateMachineTestPlan<States, Events> plan =
@@ -106,22 +58,14 @@ class AppTeamStateMachineTest {
 
     plan.test();
 
-    Message<?> message = messageCollector
-        .forChannel(trackerRequestChannel)
-        .poll();
-    assertThat(message).isNotNull();
-
-    String expectedPayload = "{\"@type\":\"create-tracker-project\",\"workflowId\":\"some-machine-id\",\"projectName\":\"some-project-name\",\"ownerEmail\":\"some-owner-email\"}";
-    assertThat(message.getPayload()).isEqualTo(expectedPayload);
+    verify(createTrackerProjectAction).execute(any());
   }
 
   @Test
   void trackerFinish() throws Exception {
-    StateMachine<States, Events> stateMachine = stateMachineService
-        .acquireStateMachine("some-machine-id");
-
-    stateMachine.getExtendedState().getVariables().put("projectName", "some-project-name");
-    stateMachine.getExtendedState().getVariables().put("ownerEmail", "some-owner-email");
+    StateMachine<States, Events> stateMachine = stateMachineFactory
+        .getStateMachine("some-machine-id");
+    stateMachine.start();
 
     stateMachine.sendEvent(Events.TRACKER_STARTED);
 

@@ -1,8 +1,6 @@
 package io.pivotal.cnde.portal.workflow.appteam;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import io.pivotal.cnde.portal.workflow.TestApplicationRunner;
 import io.pivotal.cnde.portal.workflow.appteam.TrackerStreamConfig.Tracker;
@@ -18,8 +16,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.ScriptShellApplicationRunner;
-import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @Import(TestApplicationRunner.class)
@@ -33,9 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class TrackerResponseMessageHandlerTest {
 
   @MockBean
-  private StateMachineService<States, Events> mockStateMachineService;
-  @MockBean
-  private StateMachine<States, Events> mockStateMachine;
+  private AppTeamWorkflowService mockAppTeamWorkflowService;
 
   @Qualifier(Tracker.RESPONSE)
   @Autowired
@@ -43,14 +37,11 @@ class TrackerResponseMessageHandlerTest {
 
   @Test
   void handleMessage() {
-    when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
-
     String responsePayload = "{\"workflowId\":\"some-workflow-id\",\"@type\":\"create-tracker-project\"}";
     Message<byte[]> message = MessageBuilder.withPayload(responsePayload.getBytes())
         .build();
     trackerResponseChannel.send(message);
 
-    verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
-    verify(mockStateMachine).sendEvent(Events.TRACKER_FINISHED);
+    verify(mockAppTeamWorkflowService).finishTracker("some-workflow-id");
   }
 }

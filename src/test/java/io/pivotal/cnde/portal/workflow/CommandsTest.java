@@ -11,16 +11,29 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.shell.Shell;
+import org.springframework.shell.SpringShellAutoConfiguration;
 import org.springframework.shell.jline.InteractiveShellApplicationRunner;
+import org.springframework.shell.jline.JLineShellAutoConfiguration;
 import org.springframework.shell.jline.ScriptShellApplicationRunner;
+import org.springframework.shell.standard.StandardAPIAutoConfiguration;
+import org.springframework.shell.standard.commands.StandardCommandsAutoConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @Import(TestApplicationRunner.class)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(properties = {
-    ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false",
-    InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
-})
+@SpringBootTest(
+    classes = {
+        Commands.class,
+        SpringShellAutoConfiguration.class,
+        JLineShellAutoConfiguration.class,
+        StandardAPIAutoConfiguration.class,
+        StandardCommandsAutoConfiguration.class,
+    },
+    properties = {
+        ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false",
+        InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
+    }
+)
 class CommandsTest {
 
   private final Shell shell;

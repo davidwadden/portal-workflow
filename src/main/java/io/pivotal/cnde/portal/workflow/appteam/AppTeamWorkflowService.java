@@ -27,4 +27,11 @@ public class AppTeamWorkflowService {
 
     stateMachine.sendEvent(Events.TRACKER_STARTED);
   }
+
+  public void finishTracker(String workflowId) {
+    StateMachine<States, Events> stateMachine = stateMachineService
+        .acquireStateMachine(workflowId);
+
+    stateMachine.sendEvent(Events.TRACKER_FINISHED);
+  }
 }
