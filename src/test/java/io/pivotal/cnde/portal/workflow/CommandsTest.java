@@ -26,7 +26,7 @@ class CommandsTest {
   private final Shell shell;
 
   @MockBean
-  private AppTeamWorkflowService appTeamWorkflowService;
+  private AppTeamWorkflowService mockAppTeamWorkflowService;
 
   @Autowired
   CommandsTest(Shell shell) {
@@ -37,6 +37,6 @@ class CommandsTest {
   void triggerWorkflow() {
     assertThat(shell.evaluate(() -> "trigger-workflow some-app-team-name")).isEqualTo("completed");
 
-    verify(appTeamWorkflowService).triggerWorkflow("some-app-team-name");
+    verify(mockAppTeamWorkflowService).triggerWorkflow("some-app-team-name");
   }
 }

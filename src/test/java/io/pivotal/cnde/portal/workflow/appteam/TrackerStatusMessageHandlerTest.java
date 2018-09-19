@@ -49,11 +49,12 @@ class TrackerStatusMessageHandlerTest {
   void handleMessage() {
     when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
 
-    Message<String> message = MessageBuilder.withPayload("acknowledge-tracker-provision")
+    String statusPayload = "{\"workflowId\":\"some-workflow-id\",\"@type\":\"create-tracker-project\"}";
+    Message<byte[]> message = MessageBuilder.withPayload(statusPayload.getBytes())
         .build();
     trackerStatusChannel.send(message);
 
-    verify(mockStateMachineService).acquireStateMachine("some-machine-id");
+    verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
     verify(mockStateMachine).sendEvent(Events.TRACKER_FINISHED);
   }
 }

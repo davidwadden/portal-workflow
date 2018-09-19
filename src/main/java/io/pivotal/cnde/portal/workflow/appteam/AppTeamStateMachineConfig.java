@@ -69,18 +69,7 @@ public class AppTeamStateMachineConfig extends
   public void configure(StateMachineConfigurationConfigurer<States, Events> config)
       throws Exception {
 
-    StateMachineListener<States, Events> listener = new StateMachineListenerAdapter<States, Events>() {
-      @Override
-      public void stateChanged(State<States, Events> from,
-          State<States, Events> to) {
-        logger.info(String.format("stateChanged(from: %s, to: %s)", from, to));
-      }
-
-      @Override
-      public void eventNotAccepted(Message<Events> event) {
-        logger.info(String.format("eventNotAccepted(event: %s)", event));
-      }
-    };
+    StateMachineListener<States, Events> listener = new LoggingStateMachineListenerAdapter();
 
     config
         .withConfiguration()
@@ -94,7 +83,10 @@ public class AppTeamStateMachineConfig extends
   public Action<States, Events> provisionTrackerAction() {
 
     return context -> {
-      Message<String> message = MessageBuilder.withPayload("provision-tracker-parameters")
+      CreateTrackerProject createProjectWorkerEvent = new CreateTrackerProject(
+          context.getStateMachine().getId(), "some-project-name", "some-owner-email");
+      Message<CreateTrackerProject> message = MessageBuilder.withPayload(
+          createProjectWorkerEvent)
           .build();
 
       logger.info("trackerProvisionChannel:send(message: {})", message);
@@ -102,6 +94,20 @@ public class AppTeamStateMachineConfig extends
     };
   }
 
+  private static class LoggingStateMachineListenerAdapter extends
+      StateMachineListenerAdapter<States, Events> {
+
+    @Override
+    public void stateChanged(State<States, Events> from,
+        State<States, Events> to) {
+      logger.info(String.format("stateChanged(from: %s, to: %s)", from, to));
+    }
+
+    @Override
+    public void eventNotAccepted(Message<Events> event) {
+      logger.info(String.format("eventNotAccepted(event: %s)", event));
+    }
+  }
 }
 
 enum States {

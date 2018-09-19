@@ -107,6 +107,9 @@ class AppTeamStateMachineTest {
         .forChannel(trackerProvisionChannel)
         .poll();
     assertThat(message).isNotNull();
+
+    String expectedPayload = "{\"@type\":\"create-tracker-project\",\"workflowId\":\"some-machine-id\",\"projectName\":\"some-project-name\",\"ownerEmail\":\"some-owner-email\"}";
+    assertThat(message.getPayload()).isEqualTo(expectedPayload);
   }
 
   @Test
@@ -114,8 +117,6 @@ class AppTeamStateMachineTest {
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-machine-id");
     stateMachine.sendEvent(Events.TRACKER_STARTED);
-
-    // send message to trackerStatusListen
 
     //@formatter:off
     StateMachineTestPlan<States, Events> plan =
