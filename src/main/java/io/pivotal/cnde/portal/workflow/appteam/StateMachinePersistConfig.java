@@ -10,17 +10,17 @@ import org.springframework.statemachine.service.DefaultStateMachineService;
 import org.springframework.statemachine.service.StateMachineService;
 
 @Configuration
-public class AppTeamStateMachinePersistConfig {
+public class StateMachinePersistConfig {
 
   @Bean
-  public StateMachineService<States, Events> appTeamStateMachineService(
+  public StateMachineService<States, Events> stateMachineService(
       StateMachineFactory<States, Events> stateMachineFactory,
       StateMachineRuntimePersister<States, Events, String> stateMachineRuntimePersister) {
     return new DefaultStateMachineService<>(stateMachineFactory, stateMachineRuntimePersister);
   }
 
   @Bean
-  public StateMachineRuntimePersister<States, Events, String> appTeamStateMachineRuntimePersister(
+  public StateMachineRuntimePersister<States, Events, String> stateMachineRuntimePersister(
       JpaStateMachineRepository jpaStateMachineRepository) {
     return new JpaPersistingStateMachineInterceptor<>(jpaStateMachineRepository);
   }

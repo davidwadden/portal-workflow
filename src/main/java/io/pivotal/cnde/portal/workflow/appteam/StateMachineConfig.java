@@ -22,12 +22,12 @@ import org.springframework.statemachine.persist.StateMachineRuntimePersister;
 import org.springframework.statemachine.state.State;
 
 @Configuration
-@EnableStateMachineFactory(name = "appTeamStateMachineFactory")
-public class AppTeamStateMachineConfig extends
+@EnableStateMachineFactory
+public class StateMachineConfig extends
     EnumStateMachineConfigurerAdapter<States, Events> {
 
   private static final Logger logger =
-      LoggerFactory.getLogger(AppTeamStateMachineConfig.class);
+      LoggerFactory.getLogger(StateMachineConfig.class);
 
   @Autowired
   private StateMachineRuntimePersister<States, Events, String> stateMachineRuntimePersister;

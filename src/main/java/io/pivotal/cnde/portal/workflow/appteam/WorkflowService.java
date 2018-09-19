@@ -5,11 +5,11 @@ import org.springframework.statemachine.service.StateMachineService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AppTeamWorkflowService {
+public class WorkflowService {
 
   private final StateMachineService<States, Events> stateMachineService;
 
-  public AppTeamWorkflowService(StateMachineService<States, Events> stateMachineService) {
+  public WorkflowService(StateMachineService<States, Events> stateMachineService) {
     this.stateMachineService = stateMachineService;
   }
 

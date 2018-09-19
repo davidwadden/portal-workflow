@@ -32,20 +32,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
     ScriptShellApplicationRunner.SPRING_SHELL_SCRIPT_ENABLED + "=false",
     InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=false",
 })
-class AppTeamWorkflowServiceIntegrationTest {
+class WorkflowServiceIntegrationTest {
 
-  private final AppTeamWorkflowService appTeamWorkflowService;
+  private final WorkflowService workflowService;
   private final StateMachineService<States, Events> stateMachineService;
   private final MessageChannel trackerRequestChannel;
   private final MessageCollector messageCollector;
 
   @Autowired
-  AppTeamWorkflowServiceIntegrationTest(
-      AppTeamWorkflowService appTeamWorkflowService,
+  WorkflowServiceIntegrationTest(
+      WorkflowService workflowService,
       StateMachineService<States, Events> stateMachineService,
       @Qualifier(Tracker.REQUEST) MessageChannel trackerRequestChannel,
       MessageCollector messageCollector) {
-    this.appTeamWorkflowService = appTeamWorkflowService;
+    this.workflowService = workflowService;
     this.stateMachineService = stateMachineService;
     this.trackerRequestChannel = trackerRequestChannel;
     this.messageCollector = messageCollector;
@@ -53,7 +53,7 @@ class AppTeamWorkflowServiceIntegrationTest {
 
   @Test
   void triggerWorkflow() {
-    appTeamWorkflowService
+    workflowService
         .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email");
 
     StateMachine<States, Events> stateMachine = stateMachineService
@@ -75,10 +75,10 @@ class AppTeamWorkflowServiceIntegrationTest {
   @Disabled
   @Test
   void finishTracker() {
-    appTeamWorkflowService
+    workflowService
         .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email");
 
-    appTeamWorkflowService.finishTracker("some-workflow-id");
+    workflowService.finishTracker("some-workflow-id");
 
     StateMachine<States, Events> stateMachine = stateMachineService
         .acquireStateMachine("some-workflow-id");

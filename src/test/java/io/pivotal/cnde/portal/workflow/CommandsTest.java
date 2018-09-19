@@ -3,7 +3,7 @@ package io.pivotal.cnde.portal.workflow;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-import io.pivotal.cnde.portal.workflow.appteam.AppTeamWorkflowService;
+import io.pivotal.cnde.portal.workflow.appteam.WorkflowService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ class CommandsTest {
   private final Shell shell;
 
   @MockBean
-  private AppTeamWorkflowService mockAppTeamWorkflowService;
+  private WorkflowService mockWorkflowService;
 
   @Autowired
   CommandsTest(Shell shell) {
@@ -52,7 +52,7 @@ class CommandsTest {
         "trigger-workflow --workflow-id some-workflow-id --project-name some-project-name --owner-email some-owner-email";
     assertThat(shell.evaluate(() -> shellCommand)).isEqualTo("completed");
 
-    verify(mockAppTeamWorkflowService)
+    verify(mockWorkflowService)
         .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email");
   }
 }

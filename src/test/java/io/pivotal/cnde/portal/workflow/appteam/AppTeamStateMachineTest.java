@@ -21,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
     classes = {
-        AppTeamStateMachineConfig.class,
+        StateMachineConfig.class,
     }
 )
 class AppTeamStateMachineTest {

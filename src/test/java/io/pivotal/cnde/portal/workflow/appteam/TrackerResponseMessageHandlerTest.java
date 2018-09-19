@@ -29,7 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class TrackerResponseMessageHandlerTest {
 
   @MockBean
-  private AppTeamWorkflowService mockAppTeamWorkflowService;
+  private WorkflowService mockWorkflowService;
 
   @Qualifier(Tracker.RESPONSE)
   @Autowired
@@ -42,6 +42,6 @@ class TrackerResponseMessageHandlerTest {
         .build();
     trackerResponseChannel.send(message);
 
-    verify(mockAppTeamWorkflowService).finishTracker("some-workflow-id");
+    verify(mockWorkflowService).finishTracker("some-workflow-id");
   }
 }

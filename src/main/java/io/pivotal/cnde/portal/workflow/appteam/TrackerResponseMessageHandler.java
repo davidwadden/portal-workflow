@@ -15,10 +15,10 @@ public class TrackerResponseMessageHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(TrackerResponseMessageHandler.class);
 
-  private final AppTeamWorkflowService appTeamWorkflowService;
+  private final WorkflowService workflowService;
 
-  public TrackerResponseMessageHandler(AppTeamWorkflowService appTeamWorkflowService) {
-    this.appTeamWorkflowService = appTeamWorkflowService;
+  public TrackerResponseMessageHandler(WorkflowService workflowService) {
+    this.workflowService = workflowService;
   }
 
   @StreamListener(Tracker.RESPONSE)
@@ -31,7 +31,7 @@ public class TrackerResponseMessageHandler {
           String.format("Unexpected response type: %s", message.getPayload().getType()));
     }
 
-    appTeamWorkflowService.finishTracker(message.getPayload().getWorkflowId());
+    workflowService.finishTracker(message.getPayload().getWorkflowId());
   }
 }
 

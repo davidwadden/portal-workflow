@@ -19,7 +19,7 @@ import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.support.DefaultExtendedState;
 
 @ExtendWith(MockitoExtension.class)
-class AppTeamWorkflowServiceTest {
+class WorkflowServiceTest {
 
   @Mock
   private StateMachineService<States, Events> mockStateMachineService;
@@ -28,11 +28,11 @@ class AppTeamWorkflowServiceTest {
   @Mock
   private State<States, Events> mockState;
 
-  private AppTeamWorkflowService appTeamWorkflowService;
+  private WorkflowService workflowService;
 
   @BeforeEach
   void setUp() {
-    appTeamWorkflowService = new AppTeamWorkflowService(mockStateMachineService);
+    workflowService = new WorkflowService(mockStateMachineService);
   }
 
   @Test
@@ -43,7 +43,7 @@ class AppTeamWorkflowServiceTest {
     when(mockStateMachine.getExtendedState()).thenReturn(extendedState);
     when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
 
-    appTeamWorkflowService
+    workflowService
         .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email");
 
     verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
@@ -63,7 +63,7 @@ class AppTeamWorkflowServiceTest {
 
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(
-            () -> appTeamWorkflowService
+            () -> workflowService
                 .triggerWorkflow("some-workflow-id", "some-project-name", "some-owner-email"));
 
     verify(mockStateMachine, never()).sendEvent(any(Events.class));
@@ -75,7 +75,7 @@ class AppTeamWorkflowServiceTest {
     when(mockStateMachine.getState()).thenReturn(mockState);
     when(mockStateMachineService.acquireStateMachine(any())).thenReturn(mockStateMachine);
 
-    appTeamWorkflowService.finishTracker("some-workflow-id");
+    workflowService.finishTracker("some-workflow-id");
 
     verify(mockStateMachineService).acquireStateMachine("some-workflow-id");
 
